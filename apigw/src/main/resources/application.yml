@@ -1,0 +1,32 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id : customer
+              uri: lb://CUSTOMER
+              predicates:
+                - Path=/api/v1/customers/**
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+    fetch-registry: true
+    register-with-eureka: true
+management:
+  tracing:
+    sampling:
+      probability: 1.0   # 100% sampling (for development)
+    enabled: true
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+logging:
+  pattern:
+    level: "%5p [${spring.application.name:},traceId=%X{traceId},spanId=%X{spanId}]"
