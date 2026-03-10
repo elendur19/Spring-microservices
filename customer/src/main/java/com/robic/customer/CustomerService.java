@@ -1,10 +1,13 @@
 package com.robic.customer;
 
+import com.robic.amqp.RabbitMqMessageProducer;
 import com.robic.clients.fraud.FraudCheckResponse;
 import com.robic.clients.fraud.FraudClient;
-import com.robic.clients.fraud.NotificationClient;
+import com.robic.clients.fraud.NotificationRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+
 
 @Service
 @RequiredArgsConstructor
@@ -12,7 +15,7 @@ public class CustomerService {
 
     private final CustomerRepository customerRepository;
     private final FraudClient fraudClient;
-    private final NotificationClient notificationClient;
+    private final RabbitMqMessageProducer rabbitMqMessageProducer;
 
     public void registerCustomer(CustomerRegistrationRequest customerRequest) {
         var customer = Customer.builder()
@@ -20,6 +23,7 @@ public class CustomerService {
                 .lastName(customerRequest.lastName())
                 .email(customerRequest.email())
                 .build();
+
         // todo: check if email valid
         // todo: check if email not taken
         customerRepository.saveAndFlush(customer);
@@ -30,7 +34,17 @@ public class CustomerService {
             throw new IllegalStateException("Customer is fraudster");
         }
 
-        // TODO make it async, add it to queue
-        notificationClient.createNewNotification(customer.getId());
+        NotificationRequest notificationRequest = new NotificationRequest(
+                customer.getId(),
+                customer.getEmail(),
+                "Hi %s, welcome onboard."
+        );
+
+        // send message to RabbitMQ
+        rabbitMqMessageProducer.publish(
+                notificationRequest,
+                "internal.exchange",
+                "internal.notification.routing-key"
+        );
     }
 }

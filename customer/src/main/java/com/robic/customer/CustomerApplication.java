@@ -4,7 +4,13 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
-@SpringBootApplication
+
+@SpringBootApplication(
+        scanBasePackages = {
+                "com.robic.customer",
+                "com.robic.amqp",
+        }
+)
 @EnableFeignClients(
         basePackages = "com.robic.clients"
 )
