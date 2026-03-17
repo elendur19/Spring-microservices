@@ -37,8 +37,7 @@ public class CustomerService {
         NotificationRequest notificationRequest = new NotificationRequest(
                 customer.getId(),
                 customer.getEmail(),
-                "Hi %s, welcome onboard."
-        );
+                String.format("Hi %s, welcome onboard.", customer.getFirstName()));
 
         // send message to RabbitMQ
         rabbitMqMessageProducer.publish(
