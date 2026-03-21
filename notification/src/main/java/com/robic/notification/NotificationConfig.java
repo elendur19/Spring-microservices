@@ -28,15 +28,18 @@ public class NotificationConfig {
         return new TopicExchange(internalExchange);
     }
     @Bean
-    public Queue notificationQueue() {
+    public Queue notificationQueueBean() {
         return new Queue(notificationQueue);
     }
 
     @Bean
-    public Binding internalToNotificationBinding() {
+    public Binding internalToNotificationBinding(
+            Queue notificationQueueBean,
+            TopicExchange internalTopicExchange
+    ) {
         return BindingBuilder
-                .bind(notificationQueue())
-                .to(internalTopicExchange())
+                .bind(notificationQueueBean)
+                .to(internalTopicExchange)
                 .with(internalNotificationRoutingKey);
     }
 }
